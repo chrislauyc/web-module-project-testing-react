@@ -1,16 +1,63 @@
+import React from 'react';
+import { render,screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import Display from "../Display";
+import testFetchShow from "../../api/fetchShow";
 
 
+jest.mock("../../api/fetchShow");
 
 
+describe("Render Show",()=>{
+    test("when the fetch button is pressed, the amount of select options rendered is equal to the amount of seasons in your test data.", async()=>{
+        testFetchShow.mockResolvedValueOnce(()=>{
+            return{             
+                seasons:[]
+            };
+        }).mockResolvedValueOnce({
+            seasons:[
+                {
+                    id:0,
+                    name:'testing show 1234'
+        
+                },
+                {
+                    id:1,
+                    name:'testing show 1234 1'
+                },
+                {   
+                    id:2,
+                    name:'testing show 1234 2'
+                }
+            ]
+            
+        })
+        
+        // arrange
+        let {queryAllByRole,getAllByRole,unmount} = render(<Display />);
+        // act
+        let button = getAllByRole("button").find(b=>b.textContent==="Press to Get Show Data");
 
-
-
-
-
-
-
-
-
+        userEvent.click(button);
+        
+        let length1;
+        await waitFor(()=>{
+            length1 = queryAllByRole("option").length;
+        });
+        // arrange
+        unmount(); // restore the local state
+        render(<Display />);
+        button  = screen.getAllByRole("button").find(b=>b.textContent==="Press to Get Show Data");
+        userEvent.click(button);
+        // act
+        let length2;
+        await waitFor(()=>{
+            length2 = getAllByRole("option").length;
+        });
+        // assert
+        expect(length2-length1).toBe(3);
+    });
+});
 
 
 ///Tasks:
